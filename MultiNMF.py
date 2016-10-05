@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+# paper：Multi-View Clustering via Joint Nonnegative Matrix Factorization
 import numpy as np
 from sklearn import *
 

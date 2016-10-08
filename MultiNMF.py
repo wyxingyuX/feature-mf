@@ -140,5 +140,5 @@ if __name__ == "__main__":
     views_X.append(X2)
 
     views_weight = [0.1, 0.9]
-    views_U, views_V, V_consensus = multi_view_nmf(views_X, views_weight, 10, 5)
-    print V_consensus
+    #views_U, views_V, V_consensus = multi_view_nmf(views_X, views_weight, 10, 5)
+    #print V_consensus

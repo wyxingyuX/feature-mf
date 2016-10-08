@@ -25,5 +25,5 @@ print np.linalg.norm(a,ord="fro")
 #
 # print np.dot(np.dot(a,b),c)
 d=np.array([1,2,3,4,5])
-print d
+print d.size
 print np.sum(d)

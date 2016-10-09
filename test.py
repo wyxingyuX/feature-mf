@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import numpy as np
 from sklearn import *
+import myutil as myu
 
 # b=np.arange(50).reshape(5,10)
 # print preprocessing.normalize(b,norm="l1")
@@ -12,6 +13,9 @@ from sklearn import *
 a=np.array([[1,2],[3,4]])
 print a
 print np.transpose(a)
+print myu.matrix_norm_1_1(a)
+print a.trace()
+
 b=np.array([[2,2],[1,1]])
 print b
 

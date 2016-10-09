@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
 # Paper: Multi-View Concept Learning for Data Representation
 import numpy as np
+import myutil as myu
 
 
 def updateU(X, U, V):
     X_Vt = np.dot(X, V.T)
     U_V_Vt = np.dot(np.dot(U, V), V.T)
-    m, kk = U.shape()
+    m, kk = U.shape
     for i in range(m):
         for k in range(kk):
             U[i, k] = 1.0 * U[i, k] * X_Vt[i, k] / U_V_Vt[i, k]
@@ -62,8 +63,8 @@ def updateV(beta, r, V, Nl, P, Ql, Qu, Da, Wa, Dp, Wp):
     C = getC(beta, Dp, Wa, Vl)
 
     P_Vu = np.dot(P, V[:, Nl:n])
-    for k in range(len(kk)):
-        for j in range(len(n)):
+    for k in range(kk):
+        for j in range(n):
             if j < Nl:
                 tmp = (-B[k][j] + (B[k][j] * B[k][j] + 4 * A[k][j] * C[k][j]) ** 0.5) * V[k][j] / (2.0 * A[k][j])
                 V[k][j] = min(1, tmp)
@@ -124,14 +125,24 @@ def get_La_Lp_Wa_Wp_Da_Dp(X, y):
     return La, Lp, Wa, Wp, Da, Dp
 
 
-# def L(views_X,views_U,V,):
-#     return L
+def L(beta,r,Nl,views_X,views_U,V,La,Lp):
+    term1=0
+    for i in range(len(views_X)):
+        X=views_X[i]
+        U=views_U[i]
+        term1+=np.linalg.norm(X-np.dot(U,V),ord="fro")
 
+    Vl=V[:,0:Nl]
+    term2=np.dot(np.dot(Vl,La),Vl.T).trace()-np.dot(np.dot(Vl,Lp),Vl.T).trace()
+    term3=myu.matrix_norm_1_1(V)
+
+    obj_l=0.5*term1+beta*0.5*term2+r*term3
+    return obj_l
 
 def mcl(views_X, y, Nl, beta, r, nn, k):
     # Randomly initialize (Uik)v>=0, 1>=Vkj>=o, any j,k,v
     views_U = []
-    V = np.random.uniform(0, 1, size=nn * k).reshape(nn, k)
+    V = np.random.uniform(0, 1, size=k*nn).reshape(k, nn)
     for i in range(len(views_X)):
         m, n = views_X[i].shape
         U = np.random.uniform(0, 1, size=m * k).reshape(m, k)
@@ -139,16 +150,21 @@ def mcl(views_X, y, Nl, beta, r, nn, k):
 
     itr = 0
     max_itr = 10
-    while itr < max_itr:
+    L_last=-10000
+    L_cur=0
+    while itr < max_itr and abs(L_cur-L_last)>5:
+        L_last=L_cur
         for i in range(len(views_U)):
             X = views_X[i]
             U = views_U[i]
             updateU(X, U, V)
-
         La, Lp, Wa, Wp, Da, Dp = get_La_Lp_Wa_Wp_Da_Dp(views_X[0], y)
         Ql, Qu = getQl_Qu(views_X, Nl, views_U)
         P = getP(views_U)
         updateV(beta, r, V, Nl, P, Ql, Qu, Da, Wa, Dp, Wp)
+        itr+=1
+        L_cur=L(beta,r,Nl,views_X,views_U,V,La,Lp)
+        print itr,L_cur,L_last,L_cur-L_last
 
     return views_U, V
 

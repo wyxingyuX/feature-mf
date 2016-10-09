@@ -105,9 +105,10 @@ def multi_view_nmf(views_X, views_weight, nn, k):
             Q = views_Q[i]
 
             O_last = 0
-            O_cur = 1
+            O_cur = 10
             # repeat, unitl Eq. 3.7 converge
-            while (O_cur - O_last) > 0.1:
+            inner_itr=0
+            while inner_itr<500 and abs(O_cur - O_last) >1:
                 O_last = O_cur
                 updateU(X, U, V, V_consensus, views_weight[i])
 
@@ -119,6 +120,8 @@ def multi_view_nmf(views_X, views_weight, nn, k):
                 updateV(X, U, V, V_consensus, views_weight[i])
 
                 O_cur, O_factorize, O_consensus = computL(X, U, V, V_consensus, Q, views_weight[i])
+                inner_itr+=1
+
             views_U[i] = U
             views_V[i] = V
             views_Q[i] = Q
@@ -134,11 +137,13 @@ def multi_view_nmf(views_X, views_weight, nn, k):
 
 if __name__ == "__main__":
     views_X = []
-    X1 = np.random.uniform(0, 10, size=100).reshape(10, 10)
-    X2 = np.random.uniform(20, 30, size=100).reshape(10, 10)
+    nn=10000
+    k=100
+    X1 = np.random.uniform(0, 1, size=10**7).reshape(1000, nn)
+    X2 = np.random.uniform(0, 1, size=10**7).reshape(1000, nn)
     views_X.append(X1)
     views_X.append(X2)
 
-    views_weight = [0.1, 0.9]
-    #views_U, views_V, V_consensus = multi_view_nmf(views_X, views_weight, 10, 5)
-    #print V_consensus
+    views_weight = [0.2, 0.8]
+    views_U, views_V, V_consensus = multi_view_nmf(views_X, views_weight, nn, k)
+    print V_consensus
